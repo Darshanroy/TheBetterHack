@@ -31,7 +31,7 @@ imageUrl: string;
    * Name of the farmer or farm hosting the event.
    */
 farmerName: string;
-  // Optional: Add farmerId, ticket price, registration link etc.
+  // Optional: Add farmerId, ticket price (INR), registration link etc.
 }
 
 /**
@@ -46,30 +46,30 @@ export async function getEvents(): Promise<Event[]> {
   return [
     {
       id: '1',
-      name: 'Apple Picking Festival',
-      description: 'Join us for a fun day of apple picking, cider tasting, and live music!',
-      date: 'October 5-6, 2024',
-      location: 'Sunny Orchards',
-      imageUrl: `https://picsum.photos/seed/${encodeURIComponent('apple picking event')}/400/200`,
-       farmerName: 'Sunny Orchards',
+      name: 'Mango Mela Weekend',
+      description: 'Taste and buy various types of mangoes directly from farms! Fun activities for kids too.',
+      date: 'May 25-26, 2024',
+      location: 'Lalbagh Botanical Garden, Bangalore', // Example location
+      imageUrl: `https://picsum.photos/seed/${encodeURIComponent('mango mela bangalore')}/400/200`,
+       farmerName: 'Various Farmers Collective',
     },
     {
       id: '2',
-      name: 'Organic Gardening Workshop',
-      description: 'Learn the basics of organic vegetable gardening from our expert farmers.',
-      date: 'October 19, 2024 - 10 AM',
-       location: 'Green Valley Farms Greenhouse',
-       imageUrl: `https://picsum.photos/seed/${encodeURIComponent('gardening workshop')}/400/200`,
-       farmerName: 'Green Valley Farms',
+      name: 'Terrace Gardening Workshop',
+      description: 'Learn how to start your own vegetable garden on your Bangalore terrace. Includes starter kit.',
+      date: 'June 8, 2024 - 11 AM',
+       location: 'GreenRoots Store, Koramangala',
+       imageUrl: `https://picsum.photos/seed/${encodeURIComponent('terrace garden workshop bangalore')}/400/200`,
+       farmerName: 'GreenRoots Bangalore',
     },
       {
       id: '3',
-      name: 'Pumpkin Patch Opening',
-      description: 'Our pumpkin patch opens this weekend! Find the perfect pumpkin for Halloween.',
-      date: 'Starts October 12, 2024',
-      location: 'Rooted Vegetables Farm Stand',
-      imageUrl: `https://picsum.photos/seed/${encodeURIComponent('pumpkin patch')}/400/200`,
-      farmerName: 'Rooted Vegetables',
+      name: 'Organic Millets Awareness Talk',
+      description: 'Discover the health benefits of different millets and simple recipes. Free tasting session.',
+      date: 'June 15, 2024 - 4 PM',
+      location: 'Community Hall, Jayanagar',
+      imageUrl: `https://picsum.photos/seed/${encodeURIComponent('millets india')}/400/200`,
+      farmerName: 'Sahyadri Organics',
     },
   ];
 }
@@ -89,3 +89,4 @@ export async function submitEvent(eventData: Omit<Event, 'id'>): Promise<void> {
   return Promise.resolve();
 }
 
+    

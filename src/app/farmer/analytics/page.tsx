@@ -1,10 +1,19 @@
 
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { BarChart, LineChart, PieChart, Users, DollarSign, Eye } from 'lucide-react';
+import { BarChart, LineChart, PieChart, Users, Eye, IndianRupee } from 'lucide-react'; // Use IndianRupee
 // Assume chart components exist or use placeholders
 // import { BarChartComponent, LineChartComponent, PieChartComponent } from '@/components/charts';
 
 export default function AnalyticsPage() {
+  // Example data with INR
+  const totalRevenue = 45830.50;
+  const revenueChangePercent = 15.2;
+  const totalOrders = 185;
+  const orderChange = 5;
+  const profileViews = 1250;
+  const viewChangePercent = 8;
+  const newFollowers = 35;
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-primary">Farm Analytics</h1>
@@ -15,11 +24,11 @@ export default function AnalyticsPage() {
            <Card>
                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <IndianRupee className="h-4 w-4 text-muted-foreground" />
                </CardHeader>
                <CardContent>
-                  <div className="text-2xl font-bold">$5,830.50</div>
-                  <p className="text-xs text-muted-foreground">+15.2% from last month</p>
+                  <div className="text-2xl font-bold">₹{totalRevenue.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</div>
+                  <p className="text-xs text-muted-foreground">+{revenueChangePercent}% from last month</p>
                </CardContent>
            </Card>
             <Card>
@@ -28,8 +37,8 @@ export default function AnalyticsPage() {
                    <BarChart className="h-4 w-4 text-muted-foreground" />
                </CardHeader>
                <CardContent>
-                  <div className="text-2xl font-bold">185</div>
-                  <p className="text-xs text-muted-foreground">+5 from last week</p>
+                  <div className="text-2xl font-bold">{totalOrders}</div>
+                  <p className="text-xs text-muted-foreground">+{orderChange} from last week</p>
                </CardContent>
            </Card>
            <Card>
@@ -38,8 +47,8 @@ export default function AnalyticsPage() {
                   <Eye className="h-4 w-4 text-muted-foreground" />
                </CardHeader>
                <CardContent>
-                  <div className="text-2xl font-bold">1,250</div>
-                  <p className="text-xs text-muted-foreground">+8% from last month</p>
+                  <div className="text-2xl font-bold">{profileViews.toLocaleString('en-IN')}</div>
+                  <p className="text-xs text-muted-foreground">+{viewChangePercent}% from last month</p>
                </CardContent>
            </Card>
             <Card>
@@ -48,7 +57,7 @@ export default function AnalyticsPage() {
                   <Users className="h-4 w-4 text-muted-foreground" />
                </CardHeader>
                <CardContent>
-                  <div className="text-2xl font-bold">+35</div>
+                  <div className="text-2xl font-bold">+{newFollowers}</div>
                   <p className="text-xs text-muted-foreground">In the last 30 days</p>
                </CardContent>
            </Card>
@@ -59,7 +68,7 @@ export default function AnalyticsPage() {
            <Card>
               <CardHeader>
                  <CardTitle>Sales Over Time</CardTitle>
-                  <CardDescription>Monthly revenue trend</CardDescription>
+                  <CardDescription>Monthly revenue trend (INR)</CardDescription>
               </CardHeader>
               <CardContent className="h-64 flex items-center justify-center bg-muted/50 rounded-md">
                   {/* <LineChartComponent data={...} /> */}
@@ -70,7 +79,7 @@ export default function AnalyticsPage() {
             <Card>
               <CardHeader>
                  <CardTitle>Top Selling Products</CardTitle>
-                 <CardDescription>Revenue by product</CardDescription>
+                 <CardDescription>Revenue by product (INR)</CardDescription>
               </CardHeader>
               <CardContent className="h-64 flex items-center justify-center bg-muted/50 rounded-md">
                    {/* <PieChartComponent data={...} /> */}
@@ -95,3 +104,5 @@ export default function AnalyticsPage() {
     </div>
   );
 }
+
+    

@@ -34,21 +34,21 @@ export async function getStories(): Promise<Story[]> {
   return [
     {
       id: '1',
-      content: 'Morning harvest views! ☀️',
-      duration: 7,
-      mediaUrl: `https://picsum.photos/seed/${encodeURIComponent('farm morning')}/360/640`, // Aspect ratio for stories
+      content: 'Sunrise over the fields near Nandi Hills! ☀️',
+      duration: 8,
+      mediaUrl: `https://picsum.photos/seed/${encodeURIComponent('Nandi Hills sunrise farm')}/360/640`, // Aspect ratio for stories
     },
     {
       id: '2',
-      content: 'Look at these beautiful strawberries!',
-      duration: 10,
-      mediaUrl: `https://picsum.photos/seed/${encodeURIComponent('strawberries close up')}/360/640`,
+      content: 'Fresh batch of Mallige (Jasmine) flowers ready!',
+      duration: 6,
+      mediaUrl: `https://picsum.photos/seed/${encodeURIComponent('Jasmine flowers Bangalore')}/360/640`,
     },
      {
       id: '3',
-      content: 'Farm stand open till 5 PM today.',
+      content: 'Our farm store in Jayanagar is open till 7 PM today.',
       duration: 5,
-      mediaUrl: `https://picsum.photos/seed/${encodeURIComponent('farm stand sign')}/360/640`,
+      mediaUrl: `https://picsum.photos/seed/${encodeURIComponent('farm store jayanagar')}/360/640`,
     },
   ];
 }
@@ -76,3 +76,4 @@ export async function submitStory(storyData: Omit<Story, 'id' | 'mediaUrl'> & { 
   return Promise.resolve();
 }
 
+    

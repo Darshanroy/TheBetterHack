@@ -8,14 +8,18 @@ import { Loader2, LandPlot, Sparkles } from 'lucide-react';
 import { summarizeCropDemand, type SummarizeCropDemandInput, type SummarizeCropDemandOutput } from '@/ai/flows/summarize-crop-demand';
 import { useToast } from '@/hooks/use-toast';
 
-// Example dummy data for crop demand requests
+// Example dummy data for crop demand requests (India/Bangalore focused)
 const dummyRequests = [
-  { crop: 'Tomatoes', quantity: 100, location: 'New York, NY' },
-  { crop: 'Lettuce', quantity: 50, location: 'Los Angeles, CA' },
-  { crop: 'Apples', quantity: 200, location: 'Chicago, IL' },
-  { crop: 'Tomatoes', quantity: 75, location: 'New York, NY' },
-  { crop: 'Strawberries', quantity: 150, location: 'Miami, FL' },
+  { crop: 'Tomatoes (Nati)', quantity: 50, location: 'Koramangala, Bangalore' },
+  { crop: 'Onions (Small/Sambar)', quantity: 100, location: 'Malleshwaram, Bangalore' },
+  { crop: 'Mangoes (Alphonso)', quantity: 200, location: 'Mumbai, MH' }, // Example outside Bangalore
+  { crop: 'Tomatoes (Nati)', quantity: 30, location: 'Indiranagar, Bangalore' },
+  { crop: 'Drumsticks (Moringa)', quantity: 80, location: 'Chennai, TN' }, // Example outside Bangalore
+  { crop: 'Tender Coconut', quantity: 150, location: 'Jayanagar, Bangalore'},
 ];
+
+// Update SummarizeCropDemandInputSchema in the AI flow if needed to better handle Indian units (e.g., kg, bunch, dozen)
+// For now, assuming 'quantity' is understood contextually or in generic units.
 
 export default function CropDemandPage() {
   const [requests, setRequests] = useState(dummyRequests); // In real app, fetch this data
@@ -54,7 +58,7 @@ export default function CropDemandPage() {
              <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
                  <LandPlot /> Crop Demand Requests
              </h1>
-             <p className="text-muted-foreground">View requests from consumers for specific fruits and vegetables.</p>
+             <p className="text-muted-foreground">View requests from consumers for specific fruits and vegetables across locations.</p>
           </div>
            <Button onClick={handleSummarizeDemand} disabled={isLoadingSummary || requests.length === 0}>
               {isLoadingSummary ? (
@@ -96,7 +100,7 @@ export default function CropDemandPage() {
       <Card>
         <CardHeader>
           <CardTitle>Current Requests ({requests.length})</CardTitle>
-           <CardDescription>List of active crop demand requests.</CardDescription>
+           <CardDescription>List of active crop demand requests from various locations.</CardDescription>
         </CardHeader>
         <CardContent>
           {requests.length > 0 ? (
@@ -119,3 +123,5 @@ export default function CropDemandPage() {
     </div>
   );
 }
+
+    

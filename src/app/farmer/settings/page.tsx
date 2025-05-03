@@ -5,9 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Bell, CreditCard, Shield, UserCog } from 'lucide-react';
+import { Bell, CreditCard, Shield, UserCog, IndianRupee } from 'lucide-react'; // Use IndianRupee
 
 export default function SettingsPage() {
+  // TODO: Fetch actual farmer settings
+  const farmerEmail = "contact@nammafarmer.blr";
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-primary">Settings</h1>
@@ -22,7 +25,7 @@ export default function SettingsPage() {
         <CardContent className="space-y-4">
           <div>
             <Label htmlFor="email">Email Address</Label>
-            <Input id="email" type="email" defaultValue="contact@greenvalley.farm" />
+            <Input id="email" type="email" defaultValue={farmerEmail} />
           </div>
            <div>
             <Label htmlFor="password">Password</Label>
@@ -55,7 +58,7 @@ export default function SettingsPage() {
              <Label htmlFor="crop-requests" className="flex flex-col space-y-1">
                <span>New Crop Requests</span>
                <span className="font-normal leading-snug text-muted-foreground">
-                 Get notified about new consumer crop requests.
+                 Get notified about new consumer crop requests in your area.
                </span>
              </Label>
              <Switch id="crop-requests" defaultChecked />
@@ -79,11 +82,12 @@ export default function SettingsPage() {
        {/* Payment Settings Placeholder */}
         <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><CreditCard className="h-5 w-5"/> Payments</CardTitle>
-          <CardDescription>Manage your payout methods (Placeholder).</CardDescription>
+          <CardTitle className="flex items-center gap-2"><IndianRupee className="h-5 w-5"/> Payments</CardTitle>
+          <CardDescription>Manage your payout methods (Bank Account, UPI).</CardDescription>
         </CardHeader>
         <CardContent>
-           <p className="text-muted-foreground text-sm">Payment integration coming soon.</p>
+           <p className="text-muted-foreground text-sm">Payment integration (Bank Transfer, UPI) coming soon.</p>
+           {/* TODO: Add fields for Bank Account details / UPI ID */}
         </CardContent>
       </Card>
 
@@ -101,3 +105,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    

@@ -20,7 +20,7 @@ import { submitProduct, type Product } from '@/services/products'; // Assume ser
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { generateProductDescription, type GenerateProductDescriptionInput } from '@/ai/flows/generate-product-description'; // Import AI flow
-import { Loader2, Sparkles } from 'lucide-react';
+import { Loader2, Sparkles, IndianRupee } from 'lucide-react'; // Use IndianRupee
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -31,11 +31,12 @@ const productFormSchema = z.object({
   description: z.string().min(10, {
     message: 'Description must be at least 10 characters.',
   }),
-  price: z.coerce.number().positive({ message: 'Price must be a positive number.' }),
+  price: z.coerce.number().positive({ message: 'Price must be a positive number (INR).' }),
   imageUrl: z.string().url({ message: 'Please enter a valid image URL.' }).optional().or(z.literal('')),
    // Add fields relevant for AI description generation
   productType: z.enum(['fruit', 'vegetable']).default('fruit'),
   keyTraits: z.string().optional().describe('Key traits like sweet, juicy, organic, color, size etc.'),
+  unit: z.string().min(1, { message: 'Please specify the unit (e.g., Kg, Bunch, Piece, Litre)'}).default('Kg'), // Added Unit field
 });
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
@@ -54,6 +55,7 @@ export function AddProductForm() {
       imageUrl: '',
       productType: 'fruit',
       keyTraits: '',
+      unit: 'Kg', // Default unit
     },
   });
 
@@ -65,6 +67,8 @@ export function AddProductForm() {
       const imageUrl = searchParams.get('imageUrl');
       const productType = searchParams.get('productType') as 'fruit' | 'vegetable' | null;
       const keyTraits = searchParams.get('keyTraits');
+      const unit = searchParams.get('unit');
+
 
       if (name) form.setValue('name', name);
       if (description) form.setValue('description', description);
@@ -72,6 +76,8 @@ export function AddProductForm() {
       if (imageUrl) form.setValue('imageUrl', imageUrl);
       if (productType) form.setValue('productType', productType);
       if (keyTraits) form.setValue('keyTraits', keyTraits);
+      if (unit) form.setValue('unit', unit);
+
 
   }, [searchParams, form]);
 
@@ -79,10 +85,12 @@ export function AddProductForm() {
   async function onSubmit(data: ProductFormValues) {
      console.log('Submitting product:', data);
      try {
+        // Note: The Product interface in services/products.ts might need updating
+        // if it doesn't include the 'unit' field. For now, we map to existing fields.
         const productData: Omit<Product, 'id'> = {
-            name: data.name,
+            name: `${data.name} (${data.unit})`, // Append unit to name for now
             description: data.description,
-            price: data.price,
+            price: data.price, // Price is already in INR
             // Use placeholder if URL is empty, otherwise use provided URL
             imageUrl: data.imageUrl || `https://picsum.photos/seed/${encodeURIComponent(data.name)}/400/300`,
         };
@@ -150,12 +158,12 @@ export function AddProductForm() {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Product Name (Fruit/Vegetable)</FormLabel>
+              <FormLabel>Product Name (e.g., Nati Tomato, Tender Coconut)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Organic Honeycrisp Apples" {...field} />
+                <Input placeholder="e.g., Organic Banganapalli Mangoes" {...field} />
               </FormControl>
               <FormDescription>
-                The name of the fruit or vegetable you are selling.
+                The specific name of the fruit or vegetable you are selling.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -190,7 +198,7 @@ export function AddProductForm() {
             <FormItem>
               <FormLabel>Key Traits</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Sweet, crisp, locally grown, red/green" {...field} />
+                <Input placeholder="e.g., Sweet, tangy, locally grown (Bangalore), yellow" {...field} />
               </FormControl>
               <FormDescription>
                 Keywords describing the product (used for AI description).
@@ -208,7 +216,7 @@ export function AddProductForm() {
               <FormLabel>Description</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Describe the product, its taste, origin, etc."
+                  placeholder="Describe the product, its taste, origin (e.g., Ooty, Coorg), usage suggestions..."
                   className="resize-none"
                   {...field}
                 />
@@ -235,22 +243,44 @@ export function AddProductForm() {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="price"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Price (per unit, e.g., per kg, per piece)</FormLabel>
-              <FormControl>
-                 <Input type="number" step="0.01" placeholder="0.00" {...field} />
-              </FormControl>
-              <FormDescription>
-                Set the price for your product. Specify the unit (e.g., $/kg, $/bunch).
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+           <FormField
+            control={form.control}
+            name="price"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Price (INR)</FormLabel>
+                 <FormControl>
+                    <div className="relative">
+                        <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input type="number" step="0.01" placeholder="0.00" className="pl-8" {...field} />
+                    </div>
+                 </FormControl>
+                <FormDescription>
+                    Set the price in Indian Rupees (₹).
+                </FormDescription>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+             <FormField
+                control={form.control}
+                name="unit"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Unit</FormLabel>
+                    <FormControl>
+                        <Input placeholder="e.g., Kg, Bunch, Piece, Dozen, Litre" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                        Specify the selling unit for the price.
+                    </FormDescription>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+        </div>
+
 
          <FormField
           control={form.control}
@@ -280,3 +310,5 @@ export function AddProductForm() {
     </Form>
   );
 }
+
+    

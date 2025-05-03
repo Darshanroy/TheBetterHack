@@ -5,14 +5,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import Image from 'next/image';
 import { Search, SlidersHorizontal } from 'lucide-react';
 
-// Example search results
+// Example search results (India/Bangalore focused)
 const results = [
-  { id: 'p1', type: 'product', name: 'Organic Gala Apples', image: 'https://picsum.photos/seed/gala/300/300', farmer: 'Sunny Orchards' },
-  { id: 'p2', type: 'product', name: 'Heirloom Tomatoes', image: 'https://picsum.photos/seed/tomatoes/300/300', farmer: 'Green Valley Farms' },
-  { id: 'f1', type: 'farmer', name: 'Sunny Orchards', image: 'https://picsum.photos/seed/sunny/300/300', location: 'Hudson Valley, NY' },
-  { id: 'p3', type: 'product', name: 'Fresh Basil', image: 'https://picsum.photos/seed/basil/300/300', farmer: 'Rooted Vegetables' },
-  { id: 'p4', type: 'product', name: 'Sweet Corn', image: 'https://picsum.photos/seed/corn/300/300', farmer: 'Green Valley Farms' },
-  { id: 'f2', type: 'farmer', name: 'Rooted Vegetables', image: 'https://picsum.photos/seed/rooted/300/300', location: 'Local Greenhouse' },
+  { id: 'p1', type: 'product', name: 'Organic Kashmiri Apples', image: 'https://picsum.photos/seed/kashmiri-apples/300/300', farmer: 'Himalayan Orchards' },
+  { id: 'p2', type: 'product', name: 'Ooty Carrots', image: 'https://picsum.photos/seed/ooty-carrots/300/300', farmer: 'Nilgiri Farms Collective' },
+  { id: 'f1', type: 'farmer', name: 'Namma Farmer Store', image: 'https://picsum.photos/seed/namma-farmer/300/300', location: 'Jayanagar, Bangalore' },
+  { id: 'p3', type: 'product', name: 'Fresh Curry Leaves', image: 'https://picsum.photos/seed/curry-leaves/300/300', farmer: 'Local Greens Bangalore' },
+  { id: 'p4', type: 'product', name: 'Sweet Corn (Bhutta)', image: 'https://picsum.photos/seed/bhutta/300/300', farmer: 'Nilgiri Farms Collective' },
+  { id: 'f2', type: 'farmer', name: 'Ayur Greens Bangalore', image: 'https://picsum.photos/seed/ayur-greens/300/300', location: 'Whitefield, Bangalore' },
 ];
 
 export default function ExplorePage() {
@@ -32,9 +32,9 @@ export default function ExplorePage() {
            <Button variant="secondary" size="sm">Fruits</Button>
            <Button variant="secondary" size="sm">Vegetables</Button>
            <Button variant="secondary" size="sm">Organic</Button>
-           <Button variant="secondary" size="sm">Local</Button>
-            <Button variant="secondary" size="sm">Berries</Button>
-            <Button variant="secondary" size="sm">Greens</Button>
+           <Button variant="secondary" size="sm">Local (Bangalore)</Button>
+            <Button variant="secondary" size="sm">Leafy Greens</Button>
+            <Button variant="secondary" size="sm">Exotic</Button>
        </div>
 
       {/* Grid for results */}
@@ -49,7 +49,7 @@ export default function ExplorePage() {
                   fill
                   sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
-                   data-ai-hint={item.type === 'product' ? "fruits vegetables product" : "farmer profile"}
+                   data-ai-hint={item.type === 'product' ? "fruits vegetables product india bangalore" : "farmer profile india bangalore"}
                 />
                  {/* Optional overlay for name/info */}
                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 text-white">
@@ -67,3 +67,5 @@ export default function ExplorePage() {
     </div>
   );
 }
+
+    

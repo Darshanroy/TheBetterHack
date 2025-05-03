@@ -8,6 +8,13 @@ import { Separator } from "@/components/ui/separator";
 import { Bell, CreditCard, Shield, UserCog, MapPin } from 'lucide-react';
 
 export default function SettingsPage() {
+  // TODO: Fetch actual user data
+  const user = {
+      name: "Priya Sharma",
+      email: "priya.s@email.com",
+      address: "456, 12th Main Rd, Indiranagar, Bangalore 560038",
+  }
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-primary">Settings</h1>
@@ -22,11 +29,11 @@ export default function SettingsPage() {
         <CardContent className="space-y-4">
           <div>
             <Label htmlFor="name">Name</Label>
-            <Input id="name" type="text" defaultValue="Alice Wonderland" />
+            <Input id="name" type="text" defaultValue={user.name} />
           </div>
            <div>
             <Label htmlFor="email">Email Address</Label>
-            <Input id="email" type="email" defaultValue="alice.w@email.com" />
+            <Input id="email" type="email" defaultValue={user.email} />
           </div>
            <div>
             <Label htmlFor="password">Password</Label>
@@ -48,7 +55,7 @@ export default function SettingsPage() {
            {/* Placeholder for address list */}
             <div className="p-4 border rounded-md text-sm">
                 <p className="font-medium">Home</p>
-                <p className="text-muted-foreground">123 Main St, Brooklyn, NY 11201</p>
+                <p className="text-muted-foreground">{user.address}</p>
                 <div className="mt-2 space-x-2">
                     <Button variant="link" className="p-0 h-auto text-xs">Edit</Button>
                     <Button variant="link" className="p-0 h-auto text-xs text-destructive">Remove</Button>
@@ -104,10 +111,10 @@ export default function SettingsPage() {
         <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><CreditCard className="h-5 w-5"/> Payment Methods</CardTitle>
-          <CardDescription>Manage your saved cards (Placeholder).</CardDescription>
+          <CardDescription>Manage your saved cards & UPI (Placeholder).</CardDescription>
         </CardHeader>
         <CardContent>
-           <p className="text-muted-foreground text-sm">Payment method management coming soon.</p>
+           <p className="text-muted-foreground text-sm">Payment method management (Cards, UPI) coming soon.</p>
         </CardContent>
       </Card>
 
@@ -125,3 +132,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    

@@ -6,17 +6,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { Edit2 } from "lucide-react";
+import { Edit2, IndianRupee, Eye, Users, ShoppingBag } from "lucide-react"; // Use IndianRupee
 
 export default function FarmerProfilePage() {
   // Fetch farmer data in a real app
   const farmer = {
-    name: "Green Valley Farms",
-    email: "contact@greenvalley.farm",
-    bio: "Family-owned farm specializing in organic apples and berries. Committed to sustainable agriculture.",
-    avatarUrl: "https://picsum.photos/seed/farmprofile/200/200",
-    location: "Hudson Valley, NY",
+    name: "Namma Farmer Store",
+    email: "contact@nammafarmer.blr",
+    bio: "Your local source for fresh, naturally grown vegetables and fruits in Jayanagar, Bangalore. We partner directly with farmers.",
+    avatarUrl: "https://picsum.photos/seed/namma-farmer/200/200",
+    location: "Jayanagar, Bangalore",
   };
+
+  // Example Dashboard Metrics
+  const metrics = {
+      profileViews: 1200,
+      productsSold: 150,
+      totalRevenue: 45800, // In INR
+      followers: 350,
+  }
 
   return (
     <div className="space-y-6">
@@ -36,7 +44,7 @@ export default function FarmerProfilePage() {
         <CardContent className="space-y-6">
           <div className="flex items-center gap-4">
             <Avatar className="h-20 w-20">
-              <AvatarImage src={farmer.avatarUrl} alt={farmer.name} data-ai-hint="farm logo" />
+              <AvatarImage src={farmer.avatarUrl} alt={farmer.name} data-ai-hint="farm logo india bangalore" />
               <AvatarFallback>{farmer.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <div>
@@ -49,7 +57,7 @@ export default function FarmerProfilePage() {
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
              <div>
-                <Label htmlFor="farmName">Farm Name</Label>
+                <Label htmlFor="farmName">Farm/Store Name</Label>
                 <Input id="farmName" defaultValue={farmer.name} readOnly/>
              </div>
               <div>
@@ -68,7 +76,7 @@ export default function FarmerProfilePage() {
         </CardContent>
       </Card>
 
-       {/* Placeholder for Dashboard Metrics */}
+       {/* Dashboard Metrics */}
        <Card>
          <CardHeader>
            <CardTitle>Dashboard Metrics</CardTitle>
@@ -77,20 +85,24 @@ export default function FarmerProfilePage() {
          <CardContent>
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                 <div className="text-center p-4 border rounded-md">
+                     <Eye className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
                     <p className="text-xs text-muted-foreground">Profile Views</p>
-                    <p className="text-2xl font-bold">1.2K</p>
+                    <p className="text-2xl font-bold">{metrics.profileViews.toLocaleString('en-IN')}</p>
                 </div>
                  <div className="text-center p-4 border rounded-md">
+                     <ShoppingBag className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
                     <p className="text-xs text-muted-foreground">Products Sold</p>
-                    <p className="text-2xl font-bold">150</p>
+                    <p className="text-2xl font-bold">{metrics.productsSold.toLocaleString('en-IN')}</p>
                 </div>
                  <div className="text-center p-4 border rounded-md">
+                      <IndianRupee className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
                     <p className="text-xs text-muted-foreground">Total Revenue</p>
-                    <p className="text-2xl font-bold">$5,800</p>
+                    <p className="text-2xl font-bold">₹{metrics.totalRevenue.toLocaleString('en-IN')}</p>
                 </div>
                  <div className="text-center p-4 border rounded-md">
+                      <Users className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
                     <p className="text-xs text-muted-foreground">Followers</p>
-                    <p className="text-2xl font-bold">350</p>
+                    <p className="text-2xl font-bold">{metrics.followers.toLocaleString('en-IN')}</p>
                 </div>
             </div>
          </CardContent>
@@ -98,3 +110,5 @@ export default function FarmerProfilePage() {
     </div>
   );
 }
+
+    

@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -133,9 +134,11 @@ export {
   AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogHeader,
-  AlertDialogFooter,
+  AlertDialogFooter, // Ensure Footer is exported
   AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
 }
+
+     
