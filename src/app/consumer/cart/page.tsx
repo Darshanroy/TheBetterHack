@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import Image from 'next/image';
 import { Trash2, Plus, Minus, ShoppingBag, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"; // Added AlertDialogFooter
 import type { Disease } from '@/lib/constants'; // Import Disease type
 import { useToast } from '@/hooks/use-toast'; // For showing errors
 
@@ -349,5 +349,3 @@ export default function CartPage() {
     </div>
   );
 }
-
-    
