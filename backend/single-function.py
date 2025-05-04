@@ -35,21 +35,23 @@ llm = ChatGroq(
 # ─────────────────────────────────────────
 # 3. Constants and Field Definitions (Extracted)
 # ─────────────────────────────────────────
-PRODUCT_BASE_URL = "https://example.com/post-product"
-POST_BASE_URL = "https://example.com/post-existing-product"
+PRODUCT_BASE_URL = "/app/add/product"
+POST_BASE_URL = "/app/add/post"
 
 product_fields = [
-    ("ProductName",              "What is the product name?"),
-    ("Category",                 "Which category does it belong to?"),
-    ("Description_about_the_crop","Briefly describe the crop."),
-    ("Price_per_kg",             "Price per kg (numbers only)."),
-    ("Total_quantity_produced",  "Total quantity produced (numbers only).")
+    ("name",              "What is the product name?"),
+    ("category",                 "Which category does it belong to?"),
+    ("description","Briefly describe the crop."),
+    ("price",             "Price per kg (numbers only)."),
+    ("quantity",  "Total quantity produced (numbers only)."),
+    ("unit",  "units in")
+
 ]
 
 post_fields = [
-    ("ExistingProduct",  "Which existing product do you want to post?"),
-    ("Caption",          "What caption would you like to use?"),
-    ("AdditionalMessage","Any additional message? (or 'none')")
+    ("productId",  "Which existing product do you want to post?"),
+    ("content",          "What caption would you like to use?"),
+    # ("AdditionalMessage","Any additional message? (or 'none')")
 ]
 
 # ─────────────────────────────────────────
