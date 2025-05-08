@@ -39,3 +39,12 @@ next-env.d.ts
 
 .genkit/*
 .env*
+
+# SQLite database
+*.db
+*.sqlite
+*.sqlite3
+prisma/dev.db
+prisma/*.db
+prisma/*.sqlite
+prisma/*.sqlite3

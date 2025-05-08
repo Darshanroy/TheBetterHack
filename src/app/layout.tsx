@@ -1,4 +1,3 @@
-
 import type {Metadata} from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
@@ -16,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'FarmConnect', // Updated App Name
+  title: 'FarmerSocial', // Updated App Name
   description: 'Connecting consumers and farmers for fresh produce.', // Updated Description
 };
 
@@ -26,11 +25,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning={true}> {/* Add suppressHydrationWarning here */}
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <body 
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
+      >
         {children}
         <Toaster />
-        <FloatingAiAssistant /> {/* Add AI Assistant here */}
+        <FloatingAiAssistant />
       </body>
     </html>
   );

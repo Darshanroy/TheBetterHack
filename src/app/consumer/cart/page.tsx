@@ -1,4 +1,3 @@
-
 'use client'; // Mark as client component for state management
 
 import { useState, useEffect } from 'react';
@@ -8,17 +7,13 @@ import Image from 'next/image';
 import { Trash2, Plus, Minus, ShoppingBag, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"; // Added AlertDialogFooter
-import type { Disease } from '@/lib/constants'; // Import Disease type
 import { useToast } from '@/hooks/use-toast'; // For showing errors
+import { prisma } from '@/lib/prisma';
+import { Product } from '@/services/products';
 
 // Example Cart Item Data
-interface CartItem {
-    id: string;
-    name: string;
-    price: number; // Price in INR
+interface CartItem extends Product {
     quantity: number;
-    imageUrl: string;
-    farmerName: string;
 }
 
 // Health Check Result
@@ -27,43 +22,21 @@ interface ItemHealthStatus {
     explanation: string;
 }
 
-// Example initial cart state (Updated for India/Bangalore)
-const initialCartItems: CartItem[] = [
-    { id: 'p1', name: 'Organic Kashmiri Apples', price: 150, quantity: 1, imageUrl: 'https://picsum.photos/seed/kashmiri-apples/100/100', farmerName: 'Himalayan Orchards' },
-    { id: 'p3', name: 'Fresh Tulsi (Holy Basil)', price: 30, quantity: 1, imageUrl: 'https://picsum.photos/seed/tulsi/100/100', farmerName: 'Ayur Greens Bangalore' },
-    { id: 'p5', name: 'Dried Raisins (Kishmish)', price: 100, quantity: 1, imageUrl: 'https://picsum.photos/seed/raisins/100/100', farmerName: 'Dry Fruitwala & Co.' }, // Added Raisins for demo
-];
-
-// Simulate fetching consumer profile (replace with actual fetch/context)
-const getConsumerProfile = async (): Promise<{ diseases: Disease[] }> => {
-    console.log("Fetching consumer profile...");
-    await new Promise(resolve => setTimeout(resolve, 300)); // Simulate fetch delay
-    // In a real app, fetch from user state/API/localStorage
-    // For demo, let's hardcode or read from local storage if set by profile page
-    try {
-        const profileData = localStorage.getItem('consumerProfile');
-        if (profileData) {
-             const parsed = JSON.parse(profileData);
-             // Ensure diseases is an array, even if empty
-             return { diseases: Array.isArray(parsed.healthConditions) ? parsed.healthConditions : [] };
-        }
-    } catch (e) {
-        console.error("Error reading profile from localStorage", e);
-    }
-    // Default if not found or error
-    return { diseases: [] };
-};
-
+interface CartItemWithProduct {
+    id: string;
+    quantity: number;
+    product: Product;
+}
 
 // Simulate API call to check cart item health based on diseases
-const checkCartItemHealth = async (diseases: Disease[], items: CartItem[]): Promise<Record<string, ItemHealthStatus>> => {
+const checkCartItemHealth = async (diseases: string[], items: CartItem[]): Promise<Record<string, ItemHealthStatus>> => {
     console.log("API Call: Checking cart health for diseases:", diseases);
     await new Promise(resolve => setTimeout(resolve, 800)); // Simulate API delay
 
     const results: Record<string, ItemHealthStatus> = {};
     const hasDiabetes = diseases.includes("Diabetes Mellitus");
 
-    items.forEach(item => {
+    items.forEach((item: CartItem) => {
         let status: 'good' | 'warning' = 'good';
         let explanation = `${item.name} is generally considered healthy.`;
 
@@ -73,113 +46,190 @@ const checkCartItemHealth = async (diseases: Disease[], items: CartItem[]): Prom
             explanation = `Raisins are high in natural sugars and have a moderate glycemic index. While they offer nutrients, consuming them in large quantities might significantly raise blood sugar levels for individuals with Diabetes Mellitus. Moderation is key, and it's advisable to consult with a doctor or dietitian.`;
         }
 
-        // Add more rules here for other diseases and items...
-        // Example: High Sodium item and Hypertension
-
         results[item.id] = { status, explanation };
     });
 
-    console.log("API Response:", results);
     return results;
 };
 
-
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems);
-  const [consumerDiseases, setConsumerDiseases] = useState<Disease[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [consumerDiseases, setConsumerDiseases] = useState<string[]>([]);
   const [itemHealthStatus, setItemHealthStatus] = useState<Record<string, ItemHealthStatus>>({});
   const [isLoadingHealth, setIsLoadingHealth] = useState(false);
   const [selectedWarningItem, setSelectedWarningItem] = useState<ItemHealthStatus | null>(null);
   const { toast } = useToast();
 
-   // Fetch consumer profile and check cart health on mount and when cart/diseases change
+   // Fetch cart items from API
+  useEffect(() => {
+    const fetchCartItems = async () => {
+      try {
+        const response = await fetch('/api/cart')
+        if (!response.ok) throw new Error('Failed to fetch cart items')
+        const items = await response.json()
+
+        setCartItems(items.map((item: CartItemWithProduct) => ({
+          ...item.product,
+          quantity: item.quantity
+        } as CartItem)))
+      } catch (error) {
+        console.error('Error fetching cart items:', error)
+        toast({
+          title: "Error",
+          description: "Could not load cart items.",
+          variant: "destructive",
+        })
+      }
+    }
+
+    fetchCartItems()
+  }, [toast])
+
+  // Fetch consumer profile and check cart health
   useEffect(() => {
     const fetchData = async () => {
-      setIsLoadingHealth(true);
+      setIsLoadingHealth(true)
       try {
-        const profile = await getConsumerProfile();
-        setConsumerDiseases(profile.diseases); // Store diseases
+        const response = await fetch('/api/consumer/profile')
+        if (!response.ok) throw new Error('Failed to fetch profile')
+        const profile = await response.json()
 
-        if (cartItems.length > 0 && profile.diseases.length > 0) {
-             const healthResults = await checkCartItemHealth(profile.diseases, cartItems);
-             setItemHealthStatus(healthResults);
-        } else {
-            // Clear status if no items or no diseases
-             setItemHealthStatus({});
+        if (profile) {
+          const diseases = JSON.parse(profile.healthConditions || '[]')
+          setConsumerDiseases(diseases)
+
+          if (cartItems.length > 0 && diseases.length > 0) {
+            const healthResults = await checkCartItemHealth(diseases, cartItems)
+            setItemHealthStatus(healthResults)
+          } else {
+            setItemHealthStatus({})
+          }
         }
-
       } catch (error) {
-        console.error("Error fetching data or checking health:", error);
-         toast({
-            title: "Error",
-            description: "Could not load health information for cart items.",
-            variant: "destructive",
-         });
-         setItemHealthStatus({}); // Clear status on error
+        console.error("Error fetching data or checking health:", error)
+        toast({
+          title: "Error",
+          description: "Could not load health information for cart items.",
+          variant: "destructive",
+        })
+        setItemHealthStatus({})
       } finally {
-        setIsLoadingHealth(false);
+        setIsLoadingHealth(false)
       }
-    };
+    }
 
-    fetchData();
-  }, [cartItems, toast]); // Rerun when cart items change
+    fetchData()
+  }, [cartItems, toast])
 
-  // Refetch profile if potentially updated (e.g., user navigates back after profile change)
-   useEffect(() => {
-     const handleFocus = () => {
-         console.log("Window focused, refetching profile for cart...");
-         getConsumerProfile().then(profile => {
-             // Only trigger API call if diseases actually changed and cart has items
-             if (JSON.stringify(profile.diseases) !== JSON.stringify(consumerDiseases) && cartItems.length > 0) {
-                 console.log("Diseases changed, re-checking cart health...");
-                 setConsumerDiseases(profile.diseases); // Update local state first
-                 setIsLoadingHealth(true);
-                 checkCartItemHealth(profile.diseases, cartItems)
-                    .then(setItemHealthStatus)
-                    .catch(error => {
-                         console.error("Error re-checking health:", error);
-                         toast({ title: "Error", description: "Could not update health info.", variant: "destructive" });
-                         setItemHealthStatus({});
-                     })
-                    .finally(() => setIsLoadingHealth(false));
-             } else if (cartItems.length > 0 && profile.diseases.length === 0 && Object.keys(itemHealthStatus).length > 0) {
-                 // If diseases were removed, clear the warnings
-                 console.log("Diseases removed, clearing health status...");
-                 setItemHealthStatus({});
-                 setConsumerDiseases([]);
-             } else {
-                 // Update local disease state even if no change required for API call
-                 setConsumerDiseases(profile.diseases);
-             }
-         }).catch(e => console.error("Error refetching profile on focus", e));
-     };
+  // Refetch profile if potentially updated
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log("Window focused, refetching profile for cart...")
+      fetch('/api/consumer/profile')
+        .then(response => {
+          if (!response.ok) throw new Error('Failed to fetch profile')
+          return response.json()
+        })
+        .then(profile => {
+          if (profile) {
+            const diseases = JSON.parse(profile.healthConditions || '[]')
+            // Only trigger API call if diseases actually changed and cart has items
+            if (JSON.stringify(diseases) !== JSON.stringify(consumerDiseases) && cartItems.length > 0) {
+              console.log("Diseases changed, re-checking cart health...")
+              setConsumerDiseases(diseases)
+              setIsLoadingHealth(true)
+              checkCartItemHealth(diseases, cartItems)
+                .then(setItemHealthStatus)
+                .catch((error: Error) => {
+                  console.error("Error re-checking health:", error)
+                  toast({ title: "Error", description: "Could not update health info.", variant: "destructive" })
+                  setItemHealthStatus({})
+                })
+                .finally(() => setIsLoadingHealth(false))
+            } else if (cartItems.length > 0 && diseases.length === 0 && Object.keys(itemHealthStatus).length > 0) {
+              // If diseases were removed, clear the warnings
+              console.log("Diseases removed, clearing health status...")
+              setItemHealthStatus({})
+              setConsumerDiseases([])
+            } else {
+              // Update local disease state even if no change required for API call
+              setConsumerDiseases(diseases)
+            }
+          }
+        })
+        .catch((error: Error) => console.error("Error refetching profile on focus", error))
+    }
 
-     window.addEventListener('focus', handleFocus);
-     return () => {
-       window.removeEventListener('focus', handleFocus);
-     };
-   }, [consumerDiseases, cartItems, itemHealthStatus, toast]); // Depend on current diseases state
+    window.addEventListener('focus', handleFocus)
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [consumerDiseases, cartItems, itemHealthStatus, toast])
 
+  const handleQuantityChange = async (id: string, change: number) => {
+    try {
+      const item = cartItems.find(item => item.id === id)
+      if (!item) return
 
-  const handleQuantityChange = (id: string, change: number) => {
-    setCartItems(currentItems =>
-      currentItems.map(item =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + change) } // Ensure quantity doesn't go below 1
-          : item
-      ).filter(item => item.quantity > 0) // Optionally remove if quantity hits 0 via '-'
-    );
-  };
+      const newQuantity = Math.max(1, item.quantity + change)
+      
+      const response = await fetch('/api/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId: id,
+          quantity: newQuantity
+        })
+      })
 
-  const handleRemoveItem = (id: string) => {
-    setCartItems(currentItems => currentItems.filter(item => item.id !== id));
-     // Also remove from health status if present
-    setItemHealthStatus(prev => {
-        const next = {...prev};
-        delete next[id];
-        return next;
-    });
-  };
+      if (!response.ok) throw new Error('Failed to update cart item')
+
+      setCartItems(currentItems =>
+        currentItems.map(item =>
+          item.id === id
+            ? { ...item, quantity: newQuantity }
+            : item
+        ).filter(item => item.quantity > 0)
+      )
+    } catch (error) {
+      console.error('Error updating cart item quantity:', error)
+      toast({
+        title: "Error",
+        description: "Could not update item quantity.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleRemoveItem = async (id: string) => {
+    try {
+      const response = await fetch('/api/cart', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id })
+      })
+
+      if (!response.ok) throw new Error('Failed to remove cart item')
+
+      setCartItems(currentItems => currentItems.filter(item => item.id !== id))
+      setItemHealthStatus(prev => {
+        const next = { ...prev }
+        delete next[id]
+        return next
+      })
+    } catch (error) {
+      console.error('Error removing cart item:', error)
+      toast({
+        title: "Error",
+        description: "Could not remove item from cart.",
+        variant: "destructive",
+      })
+    }
+  }
 
   const calculateSubtotal = () => {
     return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
@@ -250,7 +300,7 @@ export default function CartPage() {
                                          )
                                      )}
                                 </div>
-                                <p className="text-xs text-muted-foreground">From: {item.farmerName}</p>
+                                <p className="text-xs text-muted-foreground">From: {item.farmerId}</p>
                                 <p className="text-sm font-semibold">₹{item.price.toFixed(2)}</p>
                             </div>
                             <div className="flex items-center gap-2 border rounded-md p-1">

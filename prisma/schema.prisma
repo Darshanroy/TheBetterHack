@@ -1,0 +1,157 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// User model - base for both consumers and farmers
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  avatarUrl     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  role          String    @default("CONSUMER") // Changed from enum to string with constraint
+  
+  // Relations
+  consumerProfile ConsumerProfile?
+  farmerProfile   FarmerProfile?
+  cartItems       CartItem[]
+  orders          Order[]
+}
+
+// Consumer Profile
+model ConsumerProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  location        String
+  dietaryGoals    String?
+  healthConditions String   // Changed from String[] to String, will store as JSON
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  user            User      @relation(fields: [userId], references: [id])
+}
+
+// Farmer Profile
+model FarmerProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  bio             String?
+  location        String
+  farmName        String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  user            User      @relation(fields: [userId], references: [id])
+  products        Product[]
+  events          Event[]
+  posts           Post[]
+}
+
+// Product
+model Product {
+  id              String    @id @default(cuid())
+  name            String
+  description     String
+  price           Float
+  imageUrl        String
+  unit            String?   // e.g., Kg, Bunch, Piece
+  farmerId        String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  farmer          FarmerProfile @relation(fields: [farmerId], references: [id])
+  cartItems       CartItem[]
+  orderItems      OrderItem[]
+  posts           Post[]        @relation("PostProducts")
+}
+
+// Event
+model Event {
+  id              String    @id @default(cuid())
+  name            String
+  description     String
+  date            String    // Could be a range or specific date
+  location        String
+  imageUrl        String
+  farmerId        String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  farmer          FarmerProfile @relation(fields: [farmerId], references: [id])
+}
+
+// Post
+model Post {
+  id              String    @id @default(cuid())
+  title           String
+  content         String
+  imageUrl        String?
+  likes           Int       @default(0)
+  comments        Int       @default(0)
+  farmerId        String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  farmer          FarmerProfile @relation(fields: [farmerId], references: [id])
+  products        Product[]     @relation("PostProducts")
+}
+
+// Cart Item
+model CartItem {
+  id              String    @id @default(cuid())
+  quantity        Int       @default(1)
+  userId          String
+  productId       String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  user            User      @relation(fields: [userId], references: [id])
+  product         Product   @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+}
+
+// Order
+model Order {
+  id              String    @id @default(cuid())
+  userId          String
+  status          String    @default("PENDING") // Changed from enum to string with constraint
+  totalAmount     Float
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  user            User      @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+}
+
+// Order Item
+model OrderItem {
+  id              String    @id @default(cuid())
+  quantity        Int
+  price           Float
+  orderId         String
+  productId       String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  order           Order     @relation(fields: [orderId], references: [id])
+  product         Product   @relation(fields: [productId], references: [id])
+} 

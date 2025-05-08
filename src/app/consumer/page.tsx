@@ -1,157 +1,237 @@
+'use client';
 
-import Image from 'next/image';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Send, Bookmark } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
+import { Heart, MessageCircle, Share2 } from 'lucide-react';
 
-// Example Post Data Structure
 interface Post {
+  id: string;
+  title: string;
+  content: string;
+  imageUrl?: string;
+  createdAt: string;
+  likes: number;
+  comments: number;
+  farmer: {
+    name: string;
+    avatarUrl?: string;
+    farmerProfile: {
+      farmName: string;
+    };
+  };
+  products?: {
     id: string;
-    farmerName: string;
-    farmerAvatar: string;
+    name: string;
+    price: number;
     imageUrl: string;
-    caption: string;
-    likes: number;
-    comments: number;
-    productTags?: { name: string; price: number }[]; // Price in INR
-    isLiked?: boolean; // client-side state
-    isBookmarked?: boolean; // client-side state
+  }[];
 }
 
-// Example dummy data (India/Bangalore focused)
-const posts: Post[] = [
-  {
-    id: '1',
-    farmerName: 'Himalayan Orchards',
-    farmerAvatar: 'https://picsum.photos/seed/himalayan-farm/50/50',
-    imageUrl: 'https://picsum.photos/seed/kashmiri-apples/600/600',
-    caption: 'Fresh Kashmiri Apples just arrived! 🍎 Crisp, sweet, and perfect for the season. #freshapples #kashmir #bangalore',
-    likes: 180,
-    comments: 22,
-    productTags: [{ name: 'Kashmiri Apples (Kg)', price: 150 }],
-  },
-  {
-    id: '2',
-    farmerName: 'Nilgiri Farms Collective',
-    farmerAvatar: 'https://picsum.photos/seed/nilgiri-farm/50/50',
-    imageUrl: 'https://picsum.photos/seed/ooty-vegetables/600/600',
-    caption: 'Ooty vegetables are here! Fresh carrots, beans, and potatoes delivered straight to Bangalore. 🥕🥔 #ootyveg #farmfresh #bangalorelocal',
-    likes: 250,
-    comments: 35,
-    productTags: [{ name: 'Ooty Carrots (Kg)', price: 60 }, { name: 'Ooty Potatoes (Kg)', price: 50 }],
-  },
-   {
-    id: '3',
-    farmerName: 'Ayur Greens Bangalore',
-    farmerAvatar: 'https://picsum.photos/seed/ayur-greens/50/50',
-    imageUrl: 'https://picsum.photos/seed/greens-bangalore/600/600',
-    caption: 'Fresh batch of Palak (Spinach) and Methi (Fenugreek) harvested this morning! 🌿 #greens #localproduce #healthyfood #bangalore',
-    likes: 95,
-    comments: 12,
-     productTags: [{ name: 'Palak (Spinach) Bunch', price: 25 }, { name: 'Methi (Fenugreek) Bunch', price: 30 }],
-  },
-   {
-    id: '4', // Added post for Raisins
-    farmerName: 'Dry Fruitwala & Co.',
-    farmerAvatar: 'https://picsum.photos/seed/dryfruit-seller/50/50',
-    imageUrl: 'https://picsum.photos/seed/dry-raisins/600/600',
-    caption: 'Premium quality dried raisins (Kishmish) now in stock. Sweet and healthy snack!🍇 #raisins #kishmish #dryfruits #bangalore',
-    likes: 110,
-    comments: 18,
-     productTags: [{ name: 'Dried Raisins (250g)', price: 100 }],
-  },
-];
-
-
 export default function ConsumerHomePage() {
-  // TODO: Implement like/bookmark state and actions
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+
+  const fetchPosts = useCallback(async () => {
+    if (!hasMore || isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/posts?page=${page}&limit=10`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setPosts(prev => [...prev, ...data.posts]);
+        setHasMore(data.hasMore);
+        setPage(prev => prev + 1);
+      } else {
+        console.error('Failed to fetch posts:', data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page, hasMore, isLoading]);
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const handleLike = async (postId: string) => {
+    try {
+      const response = await fetch(`/api/posts/${postId}/like`, {
+        method: 'POST',
+      });
+      
+      if (response.ok) {
+        setPosts(prev => prev.map(post => {
+          if (post.id === postId) {
+            const isLiked = likedPosts.has(postId);
+            return {
+              ...post,
+              likes: isLiked ? post.likes - 1 : post.likes + 1
+            };
+          }
+          return post;
+        }));
+        
+        setLikedPosts(prev => {
+          const newSet = new Set(prev);
+          if (newSet.has(postId)) {
+            newSet.delete(postId);
+          } else {
+            newSet.add(postId);
+          }
+          return newSet;
+        });
+      }
+    } catch (error) {
+      console.error('Error liking post:', error);
+    }
+  };
+
+  const handleAddToCart = async (productId: string) => {
+    try {
+      const response = await fetch('/api/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId, quantity: 1 }),
+      });
+      
+      if (response.ok) {
+        // Show success toast or update UI
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    }
+  };
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      {/* Optional: Story reel placeholder */}
-       <div className="flex space-x-3 overflow-x-auto p-2 -mx-2">
-            {/* Example Farmer Names */}
-            {['NammaFarmer', 'GreenRoots', 'OrganicBlr', 'MalnadHarvest', 'SahyadriFarms'].map(farmerId => (
-                 <div key={farmerId} className="flex flex-col items-center gap-1">
-                    <Avatar className="h-16 w-16 border-2 border-accent p-0.5">
-                        <AvatarImage src={`https://picsum.photos/seed/${farmerId}/50/50`} data-ai-hint="farmer portrait india"/>
-                        <AvatarFallback>{farmerId.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                     <span className="text-xs text-muted-foreground truncate w-16 text-center">{farmerId}</span>
-                 </div>
-            ))}
-       </div>
-
-      {posts.map((post) => (
-        <Card key={post.id} className="overflow-hidden rounded-lg shadow-md">
-          <CardHeader className="flex flex-row items-center gap-3 p-3">
-            <Avatar className="h-9 w-9">
-              <AvatarImage src={post.farmerAvatar} alt={post.farmerName} data-ai-hint="farmer portrait india"/>
-              <AvatarFallback>{post.farmerName.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <span className="font-semibold text-sm">{post.farmerName}</span>
-            {/* Optional: Add timestamp or location */}
-          </CardHeader>
-          <CardContent className="p-0">
-            <Image
-              src={post.imageUrl}
-              alt={`Post by ${post.farmerName}`}
-              width={600}
-              height={600}
-              className="w-full h-auto object-cover aspect-square"
-               data-ai-hint="fruits vegetables farm product india bangalore"
-            />
-             {/* Product Tags Overlay/Section */}
-             {post.productTags && post.productTags.length > 0 && (
-               <div className="p-3 bg-background/80 backdrop-blur-sm border-t">
-                 <h4 className="text-xs font-semibold mb-1 text-muted-foreground">Featured Products:</h4>
-                 <div className="flex flex-wrap gap-2">
-                   {post.productTags.map(tag => (
-                      <Button key={tag.name} variant="secondary" size="sm" className="h-auto py-1 px-2 text-xs">
-                          {tag.name} - ₹{tag.price.toFixed(2)}
-                      </Button>
-                   ))}
-                 </div>
-               </div>
-             )}
-          </CardContent>
-          <CardFooter className="flex flex-col items-start p-3 space-y-2">
-             {/* Action Buttons */}
-             <div className="flex justify-between w-full">
-                 <div className="flex gap-3">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Heart className={`h-5 w-5 ${post.isLiked ? 'fill-red-500 text-red-500' : ''}`} />
-                        <span className="sr-only">Like</span>
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MessageCircle className="h-5 w-5" />
-                         <span className="sr-only">Comment</span>
-                    </Button>
-                     <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Send className="h-5 w-5" />
-                         <span className="sr-only">Share</span>
-                    </Button>
-                 </div>
-                 <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Bookmark className={`h-5 w-5 ${post.isBookmarked ? 'fill-foreground' : ''}`}/>
-                     <span className="sr-only">Bookmark</span>
-                </Button>
-             </div>
-             {/* Likes Count */}
-             <div className="text-sm font-semibold">{post.likes.toLocaleString()} likes</div>
-             {/* Caption */}
-             <div className="text-sm">
-                 <span className="font-semibold mr-1">{post.farmerName}</span>
-                 {post.caption}
-             </div>
-              {/* Comments Link */}
-             <div className="text-xs text-muted-foreground">
-                View all {post.comments} comments
+      <h1 className="text-3xl font-bold">Latest Updates</h1>
+      
+      <div className="space-y-6">
+        {posts.map((post) => (
+          <Card key={post.id} className="overflow-hidden">
+            {/* Post Header */}
+            <div className="flex items-center p-4">
+              <div className="w-10 h-10 rounded-full overflow-hidden mr-3">
+                <img 
+                  src={post.farmer.avatarUrl || '/default-avatar.png'} 
+                  alt={post.farmer.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <p className="font-semibold">{post.farmer.name}</p>
+                <p className="text-sm text-muted-foreground">{post.farmer.farmerProfile.farmName}</p>
+              </div>
             </div>
-          </CardFooter>
-        </Card>
-      ))}
+
+            {/* Post Image */}
+            {post.imageUrl && (
+              <div className="aspect-square relative">
+                <img 
+                  src={post.imageUrl} 
+                  alt={post.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
+            {/* Post Actions */}
+            <div className="p-4 space-y-4">
+              <div className="flex items-center space-x-4">
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => handleLike(post.id)}
+                >
+                  <Heart className={`h-6 w-6 ${likedPosts.has(post.id) ? 'fill-red-500 text-red-500' : ''}`} />
+                </Button>
+                <Button variant="ghost" size="icon">
+                  <MessageCircle className="h-6 w-6" />
+                </Button>
+                <Button variant="ghost" size="icon">
+                  <Share2 className="h-6 w-6" />
+                </Button>
+              </div>
+
+              {/* Likes and Comments */}
+              <div className="space-y-1">
+                <p className="font-semibold">{post.likes} likes</p>
+                <p className="text-sm text-muted-foreground">{post.comments} comments</p>
+              </div>
+
+              {/* Post Content */}
+              <div>
+                <p className="font-semibold">{post.title}</p>
+                <p className="text-sm">{post.content}</p>
+              </div>
+
+              {/* Attached Products */}
+              {post.products && post.products.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold">Available Products:</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {post.products.map(product => (
+                      <div key={product.id} className="flex items-center space-x-2 p-2 border rounded-lg">
+                        <img 
+                          src={product.imageUrl} 
+                          alt={product.name}
+                          className="w-12 h-12 object-cover rounded"
+                        />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{product.name}</p>
+                          <p className="text-sm text-muted-foreground">₹{product.price}</p>
+                        </div>
+                        <Button 
+                          size="sm"
+                          onClick={() => handleAddToCart(product.id)}
+                        >
+                          Add
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {hasMore && (
+        <div className="flex justify-center">
+          <Button 
+            onClick={fetchPosts} 
+            disabled={isLoading}
+            className="w-full md:w-auto"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              'Load More'
+            )}
+          </Button>
+        </div>
+      )}
+
+      {!hasMore && posts.length > 0 && (
+        <p className="text-center text-muted-foreground">
+          No more posts to load
+        </p>
+      )}
     </div>
   );
 }

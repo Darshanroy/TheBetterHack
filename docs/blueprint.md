@@ -1,4 +1,4 @@
-# **App Name**: FarmConnect
+# **App Name**: FarmerSocial
 
 ## Core Features:
 

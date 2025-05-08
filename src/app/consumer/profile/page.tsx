@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -202,17 +201,18 @@ export default function ConsumerProfilePage() {
                                     <Badge key={disease} variant="secondary" className="mr-1 mb-1"> {/* Added mb-1 */}
                                         {disease}
                                          {/* Add a small 'x' to remove */}
-                                        <button
-                                            type="button"
-                                            className="ml-1 p-0.5 rounded-full hover:bg-destructive/20"
+                                        <span
+                                            className="ml-1 p-0.5 rounded-full hover:bg-destructive/20 cursor-pointer"
                                             onClick={(e) => {
-                                                e.stopPropagation(); // Prevent popover trigger
+                                                e.stopPropagation();
                                                 handleDiseaseSelect(disease);
                                             }}
-                                             aria-label={`Remove ${disease}`}
+                                            role="button"
+                                            tabIndex={0}
+                                            aria-label="Remove Diabetes Mellitus"
                                         >
-                                             <X className="h-3 w-3" />
-                                        </button>
+                                            ×
+                                        </span>
                                     </Badge>
                                 ))}
                             </div>
